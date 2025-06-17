@@ -1,16 +1,11 @@
-// Arquivo: src/integrations/supabase/types.ts (versão manual específica)
+// Arquivo: src/integrations/supabase/types.ts (atualização)
+// Adicione estas definições aos tipos existentes
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export interface Database {
+export type Database = {
   public: {
     Tables: {
+      // ... tabelas existentes ...
+      
       canais: {
         Row: {
           id: string
@@ -35,105 +30,24 @@ export interface Database {
         }
         Relationships: []
       }
+      
       entregas: {
         Row: {
-          bateria: string
-          canal: string | null
-          cliente: string
-          created_at: string
-          data_entrega: string | null
-          endereco: string
-          entregador: string | null
-          forma_pagamento: string
-          horario_chegada: string | null
-          horario_entrega: string | null
-          horario_inicio: string | null
-          horario_pedido: string
-          id: string
-          localizacao_entrega: string | null
-          numero: string
-          referencia: string | null
-          status: "pendente" | "em_andamento" | "finalizada"
-          telefone: string
-          updated_at: string
-          urgente: boolean
-          valor: number | null
-          veiculo: string | null
-          vendedor: string | null
+          // ... campos existentes ...
+          canal: string | null // Nova coluna adicionada
         }
         Insert: {
-          bateria: string
+          // ... campos existentes ...
           canal?: string | null
-          cliente: string
-          created_at?: string
-          data_entrega?: string | null
-          endereco: string
-          entregador?: string | null
-          forma_pagamento: string
-          horario_chegada?: string | null
-          horario_entrega?: string | null
-          horario_inicio?: string | null
-          horario_pedido?: string
-          id?: string
-          localizacao_entrega?: string | null
-          numero: string
-          referencia?: string | null
-          status?: "pendente" | "em_andamento" | "finalizada"
-          telefone: string
-          updated_at?: string
-          urgente?: boolean
-          valor?: number | null
-          veiculo?: string | null
-          vendedor?: string | null
         }
         Update: {
-          bateria?: string
+          // ... campos existentes ...
           canal?: string | null
-          cliente?: string
-          created_at?: string
-          data_entrega?: string | null
-          endereco?: string
-          entregador?: string | null
-          forma_pagamento?: string
-          horario_chegada?: string | null
-          horario_entrega?: string | null
-          horario_inicio?: string | null
-          horario_pedido?: string
-          id?: string
-          localizacao_entrega?: string | null
-          numero?: string
-          referencia?: string | null
-          status?: "pendente" | "em_andamento" | "finalizada"
-          telefone?: string
-          updated_at?: string
-          urgente?: boolean
-          valor?: number | null
-          veiculo?: string | null
-          vendedor?: string | null
         }
         Relationships: []
       }
-      usuarios: {
-        Row: {
-          created_at: string
-          id: string
-          nome: string
-          tipo: "vendedora" | "entregador" | "admin"
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          nome: string
-          tipo: "vendedora" | "entregador" | "admin"
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          nome?: string
-          tipo?: "vendedora" | "entregador" | "admin"
-        }
-        Relationships: []
-      }
+      
+      // ... outras tabelas ...
     }
     Views: {
       [_ in never]: never
@@ -142,15 +56,10 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      delivery_status: "pendente" | "em_andamento" | "finalizada"
-      user_type: "vendedora" | "entregador" | "admin"
+      // ... enums existentes ...
     }
     CompositeTypes: {
       [_ in never]: never
     }
   }
 }
-
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
-export type TablesInsert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
-export type TablesUpdate<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
