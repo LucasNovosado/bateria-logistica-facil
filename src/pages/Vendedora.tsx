@@ -18,7 +18,8 @@ import {
   Calendar,
   AlertTriangle,
   Copy,
-  CheckCircle
+  CheckCircle,
+  Sparkles
 } from 'lucide-react';
 
 const Vendedora = () => {
@@ -129,7 +130,8 @@ const Vendedora = () => {
       ? `${new Date(comandaData.data_entrega).toLocaleDateString('pt-BR')} às ${comandaData.horario_entrega}`
       : 'A definir';
 
-    return `📦 Comanda de Entrega
+    return `🔋 COMANDA DE ENTREGA ⚡
+━━━━━━━━━━━━━━━━━━━━━━━━
 📍 Endereço: ${comandaData.endereco}, nº ${comandaData.numero}${comandaData.referencia ? ` (${comandaData.referencia})` : ''}
 👤 Cliente: ${comandaData.cliente}
 📱 Telefone: ${comandaData.telefone}
@@ -138,8 +140,9 @@ const Vendedora = () => {
 💳 Pagamento: ${formatarPagamento(comandaData.forma_pagamento)}
 🚗 Veículo: ${formatarVeiculo(comandaData.veiculo)}
 📅 Entrega: ${dataEntrega}
-⚠️ Urgente: ${comandaData.urgente ? 'Sim' : 'Não'}
-👤 Vendedor: ${comandaData.vendedor || 'Não informado'}`;
+${comandaData.urgente ? '🚨 URGENTE: SIM' : '⏰ Prioridade: Normal'}
+👤 Vendedor: ${comandaData.vendedor || 'Não informado'}
+━━━━━━━━━━━━━━━━━━━━━━━━`;
   };
 
   const copiarComanda = async () => {
@@ -182,18 +185,21 @@ const Vendedora = () => {
     return (
       <Layout title="Comanda Gerada">
         <div className="max-w-2xl mx-auto">
-          <Card className="p-8 rounded-3xl shadow-lg bg-white">
-            <div className="text-center space-y-6">
+          <Card className="p-8 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700 glow-green success-ping">
+            <div className="text-center space-y-8">
               <div className="flex justify-center">
-                <CheckCircle className="h-16 w-16 text-green-500" />
+                <div className="relative">
+                  <CheckCircle className="h-20 w-20 text-green-400 animate-bounce" />
+                  <Sparkles className="h-8 w-8 text-yellow-400 absolute -top-2 -right-2 animate-spin" />
+                </div>
               </div>
               
-              <h3 className="text-2xl font-bold text-slate-800">
-                ✅ Pedido Confirmado!
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-green-400 to-cyan-400 bg-clip-text text-transparent">
+                🎉 Pedido Confirmado!
               </h3>
               
-              <div className="bg-slate-50 p-6 rounded-2xl">
-                <pre className="text-left text-slate-700 whitespace-pre-wrap font-nunito">
+              <div className="bg-gray-900/70 p-6 rounded-2xl border border-gray-600 backdrop-blur-sm">
+                <pre className="text-left text-cyan-100 whitespace-pre-wrap font-mono text-sm">
                   {gerarComanda()}
                 </pre>
               </div>
@@ -201,18 +207,18 @@ const Vendedora = () => {
               <div className="space-y-4">
                 <Button
                   onClick={copiarComanda}
-                  className="w-full h-14 text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 text-white"
+                  className="w-full h-16 text-xl font-bold rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg glow-cyan transition-all duration-300 transform hover:scale-105"
                 >
-                  <Copy className="h-5 w-5 mr-3" />
-                  Copiar Comanda
+                  <Copy className="h-6 w-6 mr-3" />
+                  📋 Copiar Comanda
                 </Button>
                 
                 <Button
                   onClick={novaEntrega}
                   variant="outline"
-                  className="w-full h-14 text-lg font-semibold rounded-2xl border-slate-300 hover:bg-slate-50"
+                  className="w-full h-16 text-xl font-bold rounded-2xl border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-gray-900 transition-all duration-300 transform hover:scale-105"
                 >
-                  Cadastrar Nova Entrega
+                  ✨ Nova Entrega
                 </Button>
               </div>
             </div>
@@ -225,10 +231,10 @@ const Vendedora = () => {
   return (
     <Layout title="Cadastro de Entrega">
       <div className="max-w-2xl mx-auto">
-        <Card className="p-8 rounded-3xl shadow-lg bg-white">
+        <Card className="p-8 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700 neon-border">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Vendedor */}
-            <FormField label="Vendedor" icon={<User className="h-5 w-5" />}>
+            <FormField label="Vendedor" icon={<User className="h-6 w-6 text-cyan-400" />}>
               <SelectInput
                 value={formData.vendedor}
                 onChange={(value) => setFormData(prev => ({ ...prev, vendedor: value }))}
@@ -238,7 +244,7 @@ const Vendedora = () => {
             </FormField>
 
             {/* Endereço */}
-            <FormField label="Endereço de Entrega" icon={<MapPin className="h-5 w-5" />} required>
+            <FormField label="Endereço de Entrega" icon={<MapPin className="h-6 w-6 text-cyan-400" />} required>
               <TextInput
                 value={formData.endereco}
                 onChange={(value) => setFormData(prev => ({ ...prev, endereco: value }))}
@@ -246,7 +252,7 @@ const Vendedora = () => {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <FormField label="Número" required>
                 <TextInput
                   value={formData.numero}
@@ -265,7 +271,7 @@ const Vendedora = () => {
             </div>
 
             {/* Cliente */}
-            <FormField label="Nome do Cliente" icon={<User className="h-5 w-5" />} required>
+            <FormField label="Nome do Cliente" icon={<User className="h-6 w-6 text-cyan-400" />} required>
               <TextInput
                 value={formData.cliente}
                 onChange={(value) => setFormData(prev => ({ ...prev, cliente: value }))}
@@ -273,7 +279,7 @@ const Vendedora = () => {
               />
             </FormField>
 
-            <FormField label="Telefone" icon={<Phone className="h-5 w-5" />} required>
+            <FormField label="Telefone" icon={<Phone className="h-6 w-6 text-cyan-400" />} required>
               <TextInput
                 value={formData.telefone}
                 onChange={(value) => setFormData(prev => ({ ...prev, telefone: value }))}
@@ -283,7 +289,7 @@ const Vendedora = () => {
             </FormField>
 
             {/* Produto */}
-            <FormField label="Modelo da Bateria" icon={<Battery className="h-5 w-5" />} required>
+            <FormField label="Modelo da Bateria" icon={<Battery className="h-6 w-6 text-yellow-400" />} required>
               <TextInput
                 value={formData.bateria}
                 onChange={(value) => setFormData(prev => ({ ...prev, bateria: value }))}
@@ -291,18 +297,17 @@ const Vendedora = () => {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Valor" icon={<DollarSign className="h-5 w-5" />}>
+            <div className="grid grid-cols-2 gap-6">
+              <FormField label="Valor" icon={<DollarSign className="h-6 w-6 text-green-400" />}>
                 <TextInput
                   value={formData.valor}
                   onChange={(value) => setFormData(prev => ({ ...prev, valor: value }))}
                   placeholder="560,00"
                   type="number"
-                  step="0.01"
                 />
               </FormField>
 
-              <FormField label="Pagamento" icon={<CreditCard className="h-5 w-5" />}>
+              <FormField label="Pagamento" icon={<CreditCard className="h-6 w-6 text-cyan-400" />}>
                 <SelectInput
                   value={formData.forma_pagamento}
                   onChange={(value) => setFormData(prev => ({ ...prev, forma_pagamento: value }))}
@@ -313,7 +318,7 @@ const Vendedora = () => {
             </div>
 
             {/* Logística */}
-            <FormField label="Veículo" icon={<Truck className="h-5 w-5" />}>
+            <FormField label="Veículo" icon={<Truck className="h-6 w-6 text-yellow-400" />}>
               <SelectInput
                 value={formData.veiculo}
                 onChange={(value) => setFormData(prev => ({ ...prev, veiculo: value }))}
@@ -322,8 +327,8 @@ const Vendedora = () => {
               />
             </FormField>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Data Desejada" icon={<Calendar className="h-5 w-5" />}>
+            <div className="grid grid-cols-2 gap-6">
+              <FormField label="Data Desejada" icon={<Calendar className="h-6 w-6 text-cyan-400" />}>
                 <TextInput
                   value={formData.data_entrega}
                   onChange={(value) => setFormData(prev => ({ ...prev, data_entrega: value }))}
@@ -341,7 +346,7 @@ const Vendedora = () => {
             </div>
 
             {/* Urgente */}
-            <FormField label="Configurações" icon={<AlertTriangle className="h-5 w-5" />}>
+            <FormField label="Configurações" icon={<AlertTriangle className="h-6 w-6 text-red-400" />}>
               <CheckboxInput
                 checked={formData.urgente}
                 onChange={(checked) => setFormData(prev => ({ ...prev, urgente: checked }))}
@@ -353,9 +358,19 @@ const Vendedora = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-16 text-xl font-bold rounded-2xl bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+              className="w-full h-18 text-2xl font-bold rounded-2xl bg-gradient-to-r from-green-500 to-cyan-500 hover:from-green-400 hover:to-cyan-400 text-white shadow-2xl glow-green transition-all duration-300 transform hover:scale-105 pulse-glow"
             >
-              {loading ? '⏳ Salvando...' : '✅ Confirmar Pedido'}
+              {loading ? (
+                <>
+                  <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+                  ⏳ Salvando...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-6 w-6 mr-3" />
+                  ✅ Confirmar Pedido
+                </>
+              )}
             </Button>
           </form>
         </Card>

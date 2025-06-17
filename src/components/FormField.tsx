@@ -15,11 +15,11 @@ interface FormFieldProps {
 
 export const FormField = ({ label, icon, required, children }: FormFieldProps) => {
   return (
-    <div className="space-y-2">
-      <Label className="text-slate-700 font-medium flex items-center space-x-2">
+    <div className="space-y-3">
+      <Label className="text-cyan-400 font-medium flex items-center space-x-2 text-lg">
         {icon}
         <span>{label}</span>
-        {required && <span className="text-red-500">*</span>}
+        {required && <span className="text-yellow-400">*</span>}
       </Label>
       {children}
     </div>
@@ -40,7 +40,7 @@ export const TextInput = ({ value, onChange, placeholder, type = 'text' }: TextI
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="rounded-2xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 h-12 text-lg"
+      className="rounded-2xl border-2 border-gray-700 bg-gray-800/50 focus:border-cyan-400 focus:ring-cyan-400/20 h-14 text-lg text-white placeholder:text-gray-400 shadow-lg backdrop-blur-sm transition-all duration-300 hover:shadow-cyan-400/20"
     />
   );
 };
@@ -59,7 +59,7 @@ export const TextAreaInput = ({ value, onChange, placeholder, rows = 3 }: TextAr
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       rows={rows}
-      className="rounded-2xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-lg"
+      className="rounded-2xl border-2 border-gray-700 bg-gray-800/50 focus:border-cyan-400 focus:ring-cyan-400/20 text-lg text-white placeholder:text-gray-400 shadow-lg backdrop-blur-sm transition-all duration-300"
     />
   );
 };
@@ -74,12 +74,12 @@ interface SelectInputProps {
 export const SelectInput = ({ value, onChange, placeholder, options }: SelectInputProps) => {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger className="rounded-2xl border-slate-300 focus:border-blue-500 focus:ring-blue-500 h-12 text-lg">
-        <SelectValue placeholder={placeholder} />
+      <SelectTrigger className="rounded-2xl border-2 border-gray-700 bg-gray-800/50 focus:border-cyan-400 focus:ring-cyan-400/20 h-14 text-lg text-white shadow-lg backdrop-blur-sm transition-all duration-300">
+        <SelectValue placeholder={placeholder} className="text-white" />
       </SelectTrigger>
-      <SelectContent className="rounded-2xl">
+      <SelectContent className="rounded-2xl bg-gray-800 border-gray-700">
         {options.map((option) => (
-          <SelectItem key={option.value} value={option.value} className="text-lg">
+          <SelectItem key={option.value} value={option.value} className="text-lg text-white hover:bg-gray-700 focus:bg-gray-700">
             {option.label}
           </SelectItem>
         ))}
@@ -96,13 +96,13 @@ interface CheckboxInputProps {
 
 export const CheckboxInput = ({ checked, onChange, label }: CheckboxInputProps) => {
   return (
-    <div className="flex items-center space-x-3 p-4 rounded-2xl border border-slate-300 bg-white">
+    <div className="flex items-center space-x-4 p-4 rounded-2xl border-2 border-gray-700 bg-gray-800/50 backdrop-blur-sm transition-all duration-300 hover:border-cyan-400/50">
       <Checkbox
         checked={checked}
         onCheckedChange={onChange}
-        className="rounded-lg"
+        className="rounded-lg border-2 border-gray-600 data-[state=checked]:bg-cyan-400 data-[state=checked]:border-cyan-400"
       />
-      <span className="text-lg text-slate-700">{label}</span>
+      <span className="text-lg text-white">{label}</span>
     </div>
   );
 };
