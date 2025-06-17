@@ -21,12 +21,12 @@ import {
 import { 
   Clock, 
   CheckCircle, 
-  AlertTriangle, 
-  TrendingUp,
-  Users,
+  AlertCircle, 
+  LayoutDashboard,
+  UserCircle,
   Package,
-  DollarSign,
-  CalendarDays
+  CurrencyDollar,
+  MapPin
 } from 'lucide-react';
 
 const Admin = () => {
@@ -59,7 +59,6 @@ const Admin = () => {
     const hoje = new Date();
     const dataEntrega = new Date(entrega.created_at);
     
-    // Filtro por data
     let passaFiltroData = true;
     if (filtroData === 'hoje') {
       passaFiltroData = dataEntrega.toDateString() === hoje.toDateString();
@@ -72,36 +71,31 @@ const Admin = () => {
                       dataEntrega.getFullYear() === hoje.getFullYear();
     }
 
-    // Filtro por entregador
     const passaFiltroEntregador = filtroEntregador === 'todos' || 
                                  entrega.entregador === filtroEntregador;
 
-    // Filtro por status
     const passaFiltroStatus = filtroStatus === 'todos' || 
                              entrega.status === filtroStatus;
 
     return passaFiltroData && passaFiltroEntregador && passaFiltroStatus;
   });
 
-  // Calcular métricas
   const entregasFinalizadas = entregasFiltradas.filter(e => e.status === 'finalizada');
   const entregasUrgentes = entregasFiltradas.filter(e => e.urgente).length;
   const faturamentoTotal = entregasFiltradas.reduce((acc, e) => acc + (e.valor || 0), 0);
 
-  // Calcular tempo médio
   const temposEntrega = entregasFinalizadas
     .filter(e => e.horario_pedido && e.horario_chegada)
     .map(e => {
       const inicio = new Date(e.horario_pedido).getTime();
       const fim = new Date(e.horario_chegada!).getTime();
-      return Math.round((fim - inicio) / (1000 * 60)); // em minutos
+      return Math.round((fim - inicio) / (1000 * 60));
     });
 
   const tempoMedioGeral = temposEntrega.length > 0 
     ? Math.round(temposEntrega.reduce((acc, tempo) => acc + tempo, 0) / temposEntrega.length)
     : 0;
 
-  // Dados para gráficos
   const dadosTempoEntregador = entregadores.map(entregador => {
     const entregasDoEntregador = entregasFinalizadas.filter(e => e.entregador === entregador.nome);
     const temposDoEntregador = entregasDoEntregador
@@ -117,7 +111,7 @@ const Admin = () => {
       : 0;
 
     return {
-      nome: entregador.nome.split(' ')[0], // Apenas primeiro nome
+      nome: entregador.nome.split(' ')[0],
       tempo: tempoMedio
     };
   }).filter(item => item.tempo > 0);
@@ -131,12 +125,12 @@ const Admin = () => {
     { 
       name: 'Em Andamento', 
       value: entregasFiltradas.filter(e => e.status === 'em_andamento').length, 
-      color: '#3B82F6' 
+      color: '#00E0FF' 
     },
     { 
       name: 'Pendentes', 
       value: entregasFiltradas.filter(e => e.status === 'pendente').length, 
-      color: '#F59E0B' 
+      color: '#FFE600' 
     }
   ];
 
@@ -144,19 +138,19 @@ const Admin = () => {
     switch (status) {
       case 'pendente':
         return (
-          <Badge className={`rounded-2xl ${urgente ? 'bg-red-500' : 'bg-yellow-500'} text-white`}>
+          <Badge className={`rounded-2xl ${urgente ? 'bg-red-500' : 'bg-yellow-500'} text-white border-0`}>
             {urgente ? '🚨 URGENTE' : '⏳ Pendente'}
           </Badge>
         );
       case 'em_andamento':
         return (
-          <Badge className="rounded-2xl bg-blue-500 text-white">
+          <Badge className="rounded-2xl bg-cyan-400 text-gray-900 border-0">
             🚀 Em Andamento
           </Badge>
         );
       case 'finalizada':
         return (
-          <Badge className="rounded-2xl bg-green-500 text-white">
+          <Badge className="rounded-2xl bg-green-500 text-white border-0">
             ✅ Finalizada
           </Badge>
         );
@@ -183,7 +177,7 @@ const Admin = () => {
     <Layout title="Painel Administrativo">
       <div className="space-y-8">
         {/* Filtros */}
-        <Card className="p-6 rounded-3xl shadow-lg bg-white">
+        <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField label="Período">
               <SelectInput
@@ -216,50 +210,50 @@ const Admin = () => {
 
         {/* Cards de Métricas */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-blue-900/30 to-cyan-900/30 border-2 border-cyan-400/50 glow-cyan">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-2xl bg-blue-500">
-                <Package className="h-8 w-8 text-white" />
+              <div className="p-3 rounded-2xl bg-cyan-500/20 border border-cyan-400/50">
+                <Package className="h-8 w-8 text-cyan-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Total de Entregas</p>
-                <p className="text-2xl font-bold text-slate-800">{entregasFiltradas.length}</p>
+                <p className="text-sm text-gray-300 font-medium">Total de Entregas</p>
+                <p className="text-2xl font-bold text-white">{entregasFiltradas.length}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-green-50 to-green-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-green-900/30 to-emerald-900/30 border-2 border-green-400/50 glow-green">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-2xl bg-green-500">
-                <Clock className="h-8 w-8 text-white" />
+              <div className="p-3 rounded-2xl bg-green-500/20 border border-green-400/50">
+                <Clock className="h-8 w-8 text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Tempo Médio</p>
-                <p className="text-2xl font-bold text-slate-800">{formatarTempo(tempoMedioGeral)}</p>
+                <p className="text-sm text-gray-300 font-medium">Tempo Médio</p>
+                <p className="text-2xl font-bold text-white">{formatarTempo(tempoMedioGeral)}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-red-50 to-red-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-red-900/30 to-orange-900/30 border-2 border-red-400/50 glow-yellow">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-2xl bg-red-500">
-                <AlertTriangle className="h-8 w-8 text-white" />
+              <div className="p-3 rounded-2xl bg-red-500/20 border border-red-400/50">
+                <AlertCircle className="h-8 w-8 text-red-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Entregas Urgentes</p>
-                <p className="text-2xl font-bold text-slate-800">{entregasUrgentes}</p>
+                <p className="text-sm text-gray-300 font-medium">Entregas Urgentes</p>
+                <p className="text-2xl font-bold text-white">{entregasUrgentes}</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-2 border-yellow-400/50 glow-yellow">
             <div className="flex items-center space-x-4">
-              <div className="p-3 rounded-2xl bg-purple-500">
-                <DollarSign className="h-8 w-8 text-white" />
+              <div className="p-3 rounded-2xl bg-yellow-500/20 border border-yellow-400/50">
+                <CurrencyDollar className="h-8 w-8 text-yellow-400" />
               </div>
               <div>
-                <p className="text-sm text-slate-600 font-medium">Faturamento</p>
-                <p className="text-2xl font-bold text-slate-800">R$ {faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                <p className="text-sm text-gray-300 font-medium">Faturamento</p>
+                <p className="text-2xl font-bold text-white">R$ {faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
               </div>
             </div>
           </Card>
@@ -268,32 +262,33 @@ const Admin = () => {
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Gráfico de Tempo por Entregador */}
-          <Card className="p-6 rounded-3xl shadow-lg bg-white">
-            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-              <TrendingUp className="h-5 w-5 mr-2 text-blue-500" />
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700">
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center">
+              <LayoutDashboard className="h-5 w-5 mr-2 text-cyan-400" />
               Tempo Médio por Entregador
             </h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={dadosTempoEntregador}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="nome" stroke="#64748b" />
-                <YAxis stroke="#64748b" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                <XAxis dataKey="nome" stroke="#9CA3AF" />
+                <YAxis stroke="#9CA3AF" />
                 <Tooltip 
                   contentStyle={{ 
-                    backgroundColor: '#f8fafc', 
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '1rem'
+                    backgroundColor: '#1F2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '1rem',
+                    color: '#FFFFFF'
                   }}
                 />
-                <Bar dataKey="tempo" fill="#3B82F6" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="tempo" fill="#00E0FF" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
 
           {/* Gráfico de Status */}
-          <Card className="p-6 rounded-3xl shadow-lg bg-white">
-            <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700">
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center">
+              <CheckCircle className="h-5 w-5 mr-2 text-green-400" />
               Distribuição de Status
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -310,30 +305,37 @@ const Admin = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1F2937', 
+                    border: '1px solid #374151',
+                    borderRadius: '1rem',
+                    color: '#FFFFFF'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </Card>
         </div>
 
         {/* Tabela de Entregas */}
-        <Card className="p-6 rounded-3xl shadow-lg bg-white">
-          <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
-            <CalendarDays className="h-5 w-5 mr-2 text-purple-500" />
+        <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700">
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center">
+            <Package className="h-5 w-5 mr-2 text-yellow-400" />
             Entregas Filtradas ({entregasFiltradas.length})
           </h3>
           
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Cliente</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Endereço</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Entregador</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Pedido</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Chegada</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Tempo</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
+                <tr className="border-b border-gray-600">
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Cliente</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Endereço</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Entregador</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Pedido</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Chegada</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Tempo</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-300">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -343,20 +345,20 @@ const Admin = () => {
                     : null;
 
                   return (
-                    <tr key={entrega.id} className="border-b border-slate-100 hover:bg-slate-50">
+                    <tr key={entrega.id} className="border-b border-gray-700 hover:bg-gray-800/50">
                       <td className="py-4 px-4">
                         <div>
-                          <p className="font-medium text-slate-800">{entrega.cliente}</p>
+                          <p className="font-medium text-white">{entrega.cliente}</p>
                           {entrega.urgente && (
-                            <span className="text-xs text-red-600 font-medium">🚨 URGENTE</span>
+                            <span className="text-xs text-red-400 font-medium">🚨 URGENTE</span>
                           )}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-slate-600">{entrega.endereco}, {entrega.numero}</td>
-                      <td className="py-4 px-4 text-slate-600">{entrega.entregador || '-'}</td>
-                      <td className="py-4 px-4 text-slate-600">{formatarHorario(entrega.horario_pedido)}</td>
-                      <td className="py-4 px-4 text-slate-600">{formatarHorario(entrega.horario_chegada)}</td>
-                      <td className="py-4 px-4 text-slate-600">
+                      <td className="py-4 px-4 text-gray-300">{entrega.endereco}, {entrega.numero}</td>
+                      <td className="py-4 px-4 text-gray-300">{entrega.entregador || '-'}</td>
+                      <td className="py-4 px-4 text-gray-300">{formatarHorario(entrega.horario_pedido)}</td>
+                      <td className="py-4 px-4 text-gray-300">{formatarHorario(entrega.horario_chegada)}</td>
+                      <td className="py-4 px-4 text-gray-300">
                         {tempoTotal ? formatarTempo(tempoTotal) : '-'}
                       </td>
                       <td className="py-4 px-4">
@@ -372,19 +374,19 @@ const Admin = () => {
 
         {/* Resumo Estatístico */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-orange-900/30 to-red-900/30 border-2 border-orange-400/50">
             <div className="text-center">
-              <Users className="h-12 w-12 text-orange-500 mx-auto mb-3" />
-              <h4 className="text-lg font-bold text-slate-800 mb-2">Entregadores Ativos</h4>
-              <p className="text-3xl font-bold text-orange-600">{entregadores.length}</p>
+              <UserCircle className="h-12 w-12 text-orange-400 mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-white mb-2">Entregadores Ativos</h4>
+              <p className="text-3xl font-bold text-orange-400">{entregadores.length}</p>
             </div>
           </Card>
 
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-teal-50 to-teal-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-teal-900/30 to-cyan-900/30 border-2 border-teal-400/50">
             <div className="text-center">
-              <TrendingUp className="h-12 w-12 text-teal-500 mx-auto mb-3" />
-              <h4 className="text-lg font-bold text-slate-800 mb-2">Taxa de Sucesso</h4>
-              <p className="text-3xl font-bold text-teal-600">
+              <LayoutDashboard className="h-12 w-12 text-teal-400 mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-white mb-2">Taxa de Sucesso</h4>
+              <p className="text-3xl font-bold text-teal-400">
                 {entregasFiltradas.length > 0 
                   ? Math.round((entregasFinalizadas.length / entregasFiltradas.length) * 100)
                   : 0}%
@@ -392,11 +394,11 @@ const Admin = () => {
             </div>
           </Card>
 
-          <Card className="p-6 rounded-3xl shadow-lg bg-gradient-to-br from-indigo-50 to-indigo-100 border-0">
+          <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border-2 border-indigo-400/50">
             <div className="text-center">
-              <Clock className="h-12 w-12 text-indigo-500 mx-auto mb-3" />
-              <h4 className="text-lg font-bold text-slate-800 mb-2">Melhor Tempo</h4>
-              <p className="text-3xl font-bold text-indigo-600">
+              <Clock className="h-12 w-12 text-indigo-400 mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-white mb-2">Melhor Tempo</h4>
+              <p className="text-3xl font-bold text-indigo-400">
                 {temposEntrega.length > 0 
                   ? formatarTempo(Math.min(...temposEntrega))
                   : '-'

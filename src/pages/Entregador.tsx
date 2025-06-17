@@ -9,13 +9,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useEntregas } from '@/hooks/useEntregas';
 import { useUsuarios } from '@/hooks/useUsuarios';
 import { 
-  User, 
+  UserCircle, 
   MapPin, 
   Phone, 
   Battery, 
-  DollarSign, 
+  CurrencyDollar, 
   Clock,
-  AlertTriangle,
+  AlertCircle,
   PlayCircle,
   CheckCircle,
   Truck
@@ -120,19 +120,19 @@ const Entregador = () => {
     switch (status) {
       case 'pendente':
         return (
-          <Badge className={`rounded-2xl ${urgente ? 'bg-red-500 hover:bg-red-600' : 'bg-yellow-500 hover:bg-yellow-600'} text-white`}>
+          <Badge className={`rounded-2xl ${urgente ? 'bg-red-500 hover:bg-red-600' : 'bg-yellow-500 hover:bg-yellow-600'} text-white border-0 shadow-lg glow-yellow`}>
             {urgente ? '🚨 URGENTE' : '⏳ Pendente'}
           </Badge>
         );
       case 'em_andamento':
         return (
-          <Badge className="rounded-2xl bg-blue-500 hover:bg-blue-600 text-white">
+          <Badge className="rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-gray-900 border-0 shadow-lg glow-cyan">
             🚀 Em Andamento
           </Badge>
         );
       case 'finalizada':
         return (
-          <Badge className="rounded-2xl bg-green-500 hover:bg-green-600 text-white">
+          <Badge className="rounded-2xl bg-green-500 hover:bg-green-600 text-white border-0 shadow-lg glow-green">
             ✅ Finalizada
           </Badge>
         );
@@ -154,8 +154,8 @@ const Entregador = () => {
     <Layout title="Painel do Entregador">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Seleção do Entregador */}
-        <Card className="p-6 rounded-3xl shadow-lg bg-white">
-          <FormField label="Selecione seu nome" icon={<User className="h-5 w-5" />} required>
+        <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700 neon-border">
+          <FormField label="Selecione seu nome" icon={<UserCircle className="h-5 w-5" />} required>
             <SelectInput
               value={entregadorSelecionado}
               onChange={setEntregadorSelecionado}
@@ -168,57 +168,57 @@ const Entregador = () => {
         {/* Entregas Pendentes */}
         {entregasPendentes.length > 0 && (
           <div>
-            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center">
-              <Clock className="h-6 w-6 mr-2 text-yellow-500" />
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <Clock className="h-6 w-6 mr-2 text-yellow-400" />
               Entregas Pendentes ({entregasPendentes.length})
             </h3>
             <div className="space-y-4">
               {entregasPendentes.map((entrega) => (
-                <Card key={entrega.id} className="p-6 rounded-3xl shadow-lg bg-white">
+                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gray-800/70 backdrop-blur-lg border-2 border-gray-700 hover:border-cyan-400/50 transition-all duration-300">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="text-lg font-bold text-slate-800">{entrega.cliente}</h4>
-                        <p className="text-slate-600">Pedido às {formatarHorario(entrega.horario_pedido)}</p>
+                        <h4 className="text-lg font-bold text-white">{entrega.cliente}</h4>
+                        <p className="text-gray-300">Pedido às {formatarHorario(entrega.horario_pedido)}</p>
                       </div>
                       {getStatusBadge(entrega.status, entrega.urgente)}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.endereco}, {entrega.numero}</span>
+                        <MapPin className="h-4 w-4 text-cyan-400" />
+                        <span className="text-gray-200">{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Phone className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.telefone}</span>
+                        <Phone className="h-4 w-4 text-cyan-400" />
+                        <span className="text-gray-200">{entrega.telefone}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Battery className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.bateria}</span>
+                        <Battery className="h-4 w-4 text-yellow-400" />
+                        <span className="text-gray-200">{entrega.bateria}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-slate-500" />
-                        <span>R$ {entrega.valor?.toFixed(2) || '0,00'} ({entrega.forma_pagamento})</span>
+                        <CurrencyDollar className="h-4 w-4 text-green-400" />
+                        <span className="text-gray-200">R$ {entrega.valor?.toFixed(2) || '0,00'} ({entrega.forma_pagamento})</span>
                       </div>
                       {entrega.veiculo && (
                         <div className="flex items-center space-x-2">
-                          <Truck className="h-4 w-4 text-slate-500" />
-                          <span>{entrega.veiculo}</span>
+                          <Truck className="h-4 w-4 text-yellow-400" />
+                          <span className="text-gray-200">{entrega.veiculo}</span>
                         </div>
                       )}
                       {entrega.data_entrega && (
                         <div className="flex items-center space-x-2">
-                          <Clock className="h-4 w-4 text-slate-500" />
-                          <span>{new Date(entrega.data_entrega).toLocaleDateString('pt-BR')}</span>
+                          <Clock className="h-4 w-4 text-cyan-400" />
+                          <span className="text-gray-200">{new Date(entrega.data_entrega).toLocaleDateString('pt-BR')}</span>
                         </div>
                       )}
                     </div>
 
                     {entrega.referencia && (
-                      <div className="bg-slate-50 p-3 rounded-2xl">
-                        <p className="text-sm text-slate-600">
-                          📍 <strong>Referência:</strong> {entrega.referencia}
+                      <div className="bg-gray-900/70 p-3 rounded-2xl border border-gray-600">
+                        <p className="text-sm text-gray-300">
+                          📍 <strong className="text-cyan-400">Referência:</strong> {entrega.referencia}
                         </p>
                       </div>
                     )}
@@ -226,7 +226,7 @@ const Entregador = () => {
                     <Button
                       onClick={() => handleIniciarEntrega(entrega.id)}
                       disabled={loading || !entregadorSelecionado}
-                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 text-white"
+                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg glow-cyan transition-all duration-300 transform hover:scale-105"
                     >
                       <PlayCircle className="h-5 w-5 mr-2" />
                       {loading ? 'Iniciando...' : 'Iniciar Entrega'}
@@ -241,37 +241,37 @@ const Entregador = () => {
         {/* Entregas em Andamento */}
         {entregasAndamento.length > 0 && (
           <div>
-            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center">
-              <PlayCircle className="h-6 w-6 mr-2 text-blue-500" />
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <PlayCircle className="h-6 w-6 mr-2 text-cyan-400" />
               Em Andamento ({entregasAndamento.length})
             </h3>
             <div className="space-y-4">
               {entregasAndamento.map((entrega) => (
-                <Card key={entrega.id} className="p-6 rounded-3xl shadow-lg bg-blue-50 border-2 border-blue-200">
+                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gradient-to-r from-cyan-900/30 to-blue-900/30 backdrop-blur-lg border-2 border-cyan-400/50 glow-cyan pulse-glow">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="text-lg font-bold text-slate-800">{entrega.cliente}</h4>
-                        <p className="text-slate-600">Iniciado às {formatarHorario(entrega.horario_inicio)}</p>
+                        <h4 className="text-lg font-bold text-white">{entrega.cliente}</h4>
+                        <p className="text-cyan-300">Iniciado às {formatarHorario(entrega.horario_inicio)}</p>
                       </div>
                       {getStatusBadge(entrega.status, entrega.urgente)}
                     </div>
 
-                    <div className="bg-white p-4 rounded-2xl">
+                    <div className="bg-gray-900/70 p-4 rounded-2xl border border-cyan-400/30">
                       <div className="flex items-center space-x-2 mb-2">
-                        <MapPin className="h-4 w-4 text-slate-500" />
-                        <span className="font-medium">{entrega.endereco}, {entrega.numero}</span>
+                        <MapPin className="h-4 w-4 text-cyan-400" />
+                        <span className="font-medium text-white">{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Phone className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.telefone}</span>
+                        <Phone className="h-4 w-4 text-cyan-400" />
+                        <span className="text-gray-300">{entrega.telefone}</span>
                       </div>
                     </div>
 
                     <Button
                       onClick={() => handleFinalizarEntrega(entrega.id)}
                       disabled={loading}
-                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-green-500 hover:bg-green-600 text-white"
+                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-400 hover:to-yellow-400 text-gray-900 shadow-lg glow-green transition-all duration-300 transform hover:scale-105"
                     >
                       <CheckCircle className="h-5 w-5 mr-2" />
                       {loading ? 'Finalizando...' : 'Finalizar Entrega'}
@@ -286,37 +286,37 @@ const Entregador = () => {
         {/* Entregas Finalizadas */}
         {entregasFinalizadas.length > 0 && (
           <div>
-            <h3 className="text-xl font-bold text-slate-800 mb-4 flex items-center">
-              <CheckCircle className="h-6 w-6 mr-2 text-green-500" />
+            <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+              <CheckCircle className="h-6 w-6 mr-2 text-green-400" />
               Finalizadas Hoje ({entregasFinalizadas.length})
             </h3>
             <div className="space-y-4">
               {entregasFinalizadas.slice(0, 5).map((entrega) => (
-                <Card key={entrega.id} className="p-6 rounded-3xl shadow-lg bg-green-50 border-2 border-green-200">
+                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gradient-to-r from-green-900/30 to-emerald-900/30 backdrop-blur-lg border-2 border-green-400/50 glow-green">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="text-lg font-bold text-slate-800">{entrega.cliente}</h4>
-                        <p className="text-slate-600">Finalizado às {formatarHorario(entrega.horario_chegada)}</p>
+                        <h4 className="text-lg font-bold text-white">{entrega.cliente}</h4>
+                        <p className="text-green-300">Finalizado às {formatarHorario(entrega.horario_chegada)}</p>
                       </div>
                       {getStatusBadge(entrega.status, entrega.urgente)}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.endereco}, {entrega.numero}</span>
+                        <MapPin className="h-4 w-4 text-green-400" />
+                        <span className="text-gray-200">{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-slate-500" />
-                        <span>R$ {entrega.valor?.toFixed(2) || '0,00'}</span>
+                        <CurrencyDollar className="h-4 w-4 text-green-400" />
+                        <span className="text-gray-200">R$ {entrega.valor?.toFixed(2) || '0,00'}</span>
                       </div>
                     </div>
 
                     {entrega.localizacao_entrega && (
-                      <div className="bg-white p-3 rounded-2xl">
-                        <p className="text-sm text-slate-600">
-                          📍 <strong>Localização registrada:</strong> {entrega.localizacao_entrega}
+                      <div className="bg-gray-900/70 p-3 rounded-2xl border border-green-400/30">
+                        <p className="text-sm text-gray-300">
+                          📍 <strong className="text-green-400">Localização registrada:</strong> {entrega.localizacao_entrega}
                         </p>
                       </div>
                     )}
@@ -329,12 +329,12 @@ const Entregador = () => {
 
         {/* Estado vazio */}
         {entregas.length === 0 && (
-          <Card className="p-12 rounded-3xl shadow-lg bg-white text-center">
-            <Truck className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-slate-600 mb-2">
+          <Card className="p-12 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700 text-center">
+            <Truck className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">
               Nenhuma entrega no momento
             </h3>
-            <p className="text-slate-500">
+            <p className="text-gray-400">
               Aguarde novas entregas serem cadastradas.
             </p>
           </Card>
