@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { FormField, SelectInput } from '@/components/FormField';
@@ -25,7 +24,7 @@ import {
   LayoutDashboard,
   UserCircle,
   Package,
-  CurrencyDollar,
+  DollarSign, // Mudança aqui: CurrencyDollar para DollarSign
   MapPin
 } from 'lucide-react';
 
@@ -249,7 +248,7 @@ const Admin = () => {
           <Card className="p-6 rounded-3xl shadow-2xl bg-gradient-to-br from-yellow-900/30 to-orange-900/30 border-2 border-yellow-400/50 glow-yellow">
             <div className="flex items-center space-x-4">
               <div className="p-3 rounded-2xl bg-yellow-500/20 border border-yellow-400/50">
-                <CurrencyDollar className="h-8 w-8 text-yellow-400" />
+                <DollarSign className="h-8 w-8 text-yellow-400" />
               </div>
               <div>
                 <p className="text-sm text-gray-300 font-medium">Faturamento</p>

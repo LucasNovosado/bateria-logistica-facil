@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { FormField, TextInput, SelectInput, CheckboxInput } from '@/components/FormField';
@@ -7,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useEntregas } from '@/hooks/useEntregas';
 import { useUsuarios } from '@/hooks/useUsuarios';
+import { useCanais } from '@/hooks/useCanais'; // Novo hook
 import { 
   MapPin, 
   User, 
@@ -19,13 +19,15 @@ import {
   AlertTriangle,
   Copy,
   CheckCircle,
-  Sparkles
+  Sparkles,
+  Zap // Novo ícone para canal
 } from 'lucide-react';
 
 const Vendedora = () => {
   const { toast } = useToast();
   const { criarEntrega, loading } = useEntregas();
   const { vendedoras } = useUsuarios();
+  const { canaisAtivos } = useCanais(); // Hook dos canais
   const [showComanda, setShowComanda] = useState(false);
   const [comandaData, setComandaData] = useState<any>(null);
   
@@ -42,7 +44,8 @@ const Vendedora = () => {
     data_entrega: '',
     horario_entrega: '',
     urgente: false,
-    vendedor: ''
+    vendedor: '',
+    canal: '' // Novo campo
   });
 
   const formasPagamento = [
@@ -62,6 +65,12 @@ const Vendedora = () => {
   const vendedorasOptions = vendedoras.map(v => ({
     value: v.nome,
     label: `👩‍💼 ${v.nome}`
+  }));
+
+  // Opções de canais dinâmicas
+  const canaisOptions = canaisAtivos.map(canal => ({
+    value: canal.nome_canal,
+    label: `📢 ${canal.nome_canal}`
   }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -92,6 +101,7 @@ const Vendedora = () => {
       horario_entrega: formData.horario_entrega || null,
       urgente: formData.urgente,
       vendedor: formData.vendedor || null,
+      canal: formData.canal || null, // Novo campo
       status: 'pendente' as const
     };
 
@@ -140,6 +150,7 @@ const Vendedora = () => {
 💳 Pagamento: ${formatarPagamento(comandaData.forma_pagamento)}
 🚗 Veículo: ${formatarVeiculo(comandaData.veiculo)}
 📅 Entrega: ${dataEntrega}
+📢 Canal: ${comandaData.canal || 'Não informado'}
 ${comandaData.urgente ? '🚨 URGENTE: SIM' : '⏰ Prioridade: Normal'}
 👤 Vendedor: ${comandaData.vendedor || 'Não informado'}
 ━━━━━━━━━━━━━━━━━━━━━━━━`;
@@ -175,7 +186,8 @@ ${comandaData.urgente ? '🚨 URGENTE: SIM' : '⏰ Prioridade: Normal'}
       data_entrega: '',
       horario_entrega: '',
       urgente: false,
-      vendedor: ''
+      vendedor: '',
+      canal: '' // Reset do canal
     });
     setShowComanda(false);
     setComandaData(null);
@@ -233,15 +245,26 @@ ${comandaData.urgente ? '🚨 URGENTE: SIM' : '⏰ Prioridade: Normal'}
       <div className="max-w-2xl mx-auto">
         <Card className="p-8 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700 neon-border">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Vendedor */}
-            <FormField label="Vendedor" icon={<User className="h-6 w-6 text-cyan-400" />}>
-              <SelectInput
-                value={formData.vendedor}
-                onChange={(value) => setFormData(prev => ({ ...prev, vendedor: value }))}
-                placeholder="Selecione o vendedor"
-                options={vendedorasOptions}
-              />
-            </FormField>
+            {/* Vendedor e Canal */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField label="Vendedor" icon={<User className="h-6 w-6 text-cyan-400" />}>
+                <SelectInput
+                  value={formData.vendedor}
+                  onChange={(value) => setFormData(prev => ({ ...prev, vendedor: value }))}
+                  placeholder="Selecione o vendedor"
+                  options={vendedorasOptions}
+                />
+              </FormField>
+
+              <FormField label="Canal de Venda" icon={<Zap className="h-6 w-6 text-yellow-400" />} required>
+                <SelectInput
+                  value={formData.canal}
+                  onChange={(value) => setFormData(prev => ({ ...prev, canal: value }))}
+                  placeholder="Selecione o canal"
+                  options={canaisOptions}
+                />
+              </FormField>
+            </div>
 
             {/* Endereço */}
             <FormField label="Endereço de Entrega" icon={<MapPin className="h-6 w-6 text-cyan-400" />} required>

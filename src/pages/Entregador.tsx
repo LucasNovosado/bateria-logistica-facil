@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { FormField, SelectInput } from '@/components/FormField';
@@ -13,7 +12,7 @@ import {
   MapPin, 
   Phone, 
   Battery, 
-  CurrencyDollar, 
+  DollarSign, 
   Clock,
   AlertCircle,
   PlayCircle,
@@ -120,19 +119,19 @@ const Entregador = () => {
     switch (status) {
       case 'pendente':
         return (
-          <Badge className={`rounded-2xl ${urgente ? 'bg-red-500 hover:bg-red-600' : 'bg-yellow-500 hover:bg-yellow-600'} text-white border-0 shadow-lg glow-yellow`}>
+          <Badge className={`rounded-2xl ${urgente ? 'bg-red-500 hover:bg-red-600' : 'bg-yellow-500 hover:bg-yellow-600'} text-white border-0 shadow-lg`}>
             {urgente ? '🚨 URGENTE' : '⏳ Pendente'}
           </Badge>
         );
       case 'em_andamento':
         return (
-          <Badge className="rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-gray-900 border-0 shadow-lg glow-cyan">
+          <Badge className="rounded-2xl bg-cyan-400 hover:bg-cyan-300 text-gray-900 border-0 shadow-lg">
             🚀 Em Andamento
           </Badge>
         );
       case 'finalizada':
         return (
-          <Badge className="rounded-2xl bg-green-500 hover:bg-green-600 text-white border-0 shadow-lg glow-green">
+          <Badge className="rounded-2xl bg-green-500 hover:bg-green-600 text-white border-0 shadow-lg">
             ✅ Finalizada
           </Badge>
         );
@@ -154,7 +153,7 @@ const Entregador = () => {
     <Layout title="Painel do Entregador">
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Seleção do Entregador */}
-        <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700 neon-border">
+        <Card className="p-6 rounded-3xl shadow-2xl bg-gray-800/50 backdrop-blur-lg border-2 border-gray-700">
           <FormField label="Selecione seu nome" icon={<UserCircle className="h-5 w-5" />} required>
             <SelectInput
               value={entregadorSelecionado}
@@ -198,7 +197,7 @@ const Entregador = () => {
                         <span className="text-gray-200">{entrega.bateria}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <CurrencyDollar className="h-4 w-4 text-green-400" />
+                        <DollarSign className="h-4 w-4 text-green-400" />
                         <span className="text-gray-200">R$ {entrega.valor?.toFixed(2) || '0,00'} ({entrega.forma_pagamento})</span>
                       </div>
                       {entrega.veiculo && (
@@ -226,7 +225,7 @@ const Entregador = () => {
                     <Button
                       onClick={() => handleIniciarEntrega(entrega.id)}
                       disabled={loading || !entregadorSelecionado}
-                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg glow-cyan transition-all duration-300 transform hover:scale-105"
+                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white shadow-lg transition-all duration-300 transform hover:scale-105"
                     >
                       <PlayCircle className="h-5 w-5 mr-2" />
                       {loading ? 'Iniciando...' : 'Iniciar Entrega'}
@@ -247,7 +246,7 @@ const Entregador = () => {
             </h3>
             <div className="space-y-4">
               {entregasAndamento.map((entrega) => (
-                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gradient-to-r from-cyan-900/30 to-blue-900/30 backdrop-blur-lg border-2 border-cyan-400/50 glow-cyan pulse-glow">
+                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gradient-to-r from-cyan-900/30 to-blue-900/30 backdrop-blur-lg border-2 border-cyan-400/50">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
@@ -271,7 +270,7 @@ const Entregador = () => {
                     <Button
                       onClick={() => handleFinalizarEntrega(entrega.id)}
                       disabled={loading}
-                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-400 hover:to-yellow-400 text-gray-900 shadow-lg glow-green transition-all duration-300 transform hover:scale-105"
+                      className="w-full h-12 text-lg font-semibold rounded-2xl bg-gradient-to-r from-green-500 to-yellow-500 hover:from-green-400 hover:to-yellow-400 text-gray-900 shadow-lg transition-all duration-300 transform hover:scale-105"
                     >
                       <CheckCircle className="h-5 w-5 mr-2" />
                       {loading ? 'Finalizando...' : 'Finalizar Entrega'}
@@ -292,7 +291,7 @@ const Entregador = () => {
             </h3>
             <div className="space-y-4">
               {entregasFinalizadas.slice(0, 5).map((entrega) => (
-                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gradient-to-r from-green-900/30 to-emerald-900/30 backdrop-blur-lg border-2 border-green-400/50 glow-green">
+                <Card key={entrega.id} className="p-6 rounded-3xl shadow-2xl bg-gradient-to-r from-green-900/30 to-emerald-900/30 backdrop-blur-lg border-2 border-green-400/50">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
@@ -308,7 +307,7 @@ const Entregador = () => {
                         <span className="text-gray-200">{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <CurrencyDollar className="h-4 w-4 text-green-400" />
+                        <DollarSign className="h-4 w-4 text-green-400" />
                         <span className="text-gray-200">R$ {entrega.valor?.toFixed(2) || '0,00'}</span>
                       </div>
                     </div>
