@@ -4,6 +4,8 @@ import Layout from '@/components/Layout';
 import { FormField, SelectInput } from '@/components/FormField';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useEntregas } from '@/hooks/useEntregas';
+import { useUsuarios } from '@/hooks/useUsuarios';
 import { 
   BarChart, 
   Bar, 
@@ -28,65 +30,11 @@ import {
 } from 'lucide-react';
 
 const Admin = () => {
+  const { entregas } = useEntregas();
+  const { entregadores } = useUsuarios();
   const [filtroData, setFiltroData] = useState('hoje');
   const [filtroEntregador, setFiltroEntregador] = useState('todos');
   const [filtroStatus, setFiltroStatus] = useState('todos');
-
-  // Dados mockados das entregas
-  const entregas = [
-    {
-      id: 1,
-      cliente: 'João da Silva',
-      endereco: 'Rua das Flores, 123',
-      entregador: 'Carlos Silva',
-      horarioPedido: '13:45',
-      horarioChegada: '15:12',
-      tempoTotal: 87, // em minutos
-      urgente: true,
-      status: 'finalizada',
-      valor: 560,
-      data: '2024-06-17'
-    },
-    {
-      id: 2,
-      cliente: 'Maria Santos',
-      endereco: 'Av. Brasil, 456',
-      entregador: 'Antônio Costa',
-      horarioPedido: '14:20',
-      horarioChegada: '15:45',
-      tempoTotal: 85,
-      urgente: false,
-      status: 'finalizada',
-      valor: 380,
-      data: '2024-06-17'
-    },
-    {
-      id: 3,
-      cliente: 'Pedro Oliveira',
-      endereco: 'Rua São João, 789',
-      entregador: 'Carlos Silva',
-      horarioPedido: '15:30',
-      horarioChegada: '16:50',
-      tempoTotal: 80,
-      urgente: false,
-      status: 'finalizada',
-      valor: 420,
-      data: '2024-06-17'
-    },
-    {
-      id: 4,
-      cliente: 'Ana Costa',
-      endereco: 'Av. Central, 321',
-      entregador: 'José Santos',
-      horarioPedido: '16:00',
-      horarioChegada: null,
-      tempoTotal: null,
-      urgente: true,
-      status: 'em-andamento',
-      valor: 600,
-      data: '2024-06-17'
-    }
-  ];
 
   const filtrosData = [
     { value: 'hoje', label: '📅 Hoje' },
@@ -96,41 +44,100 @@ const Admin = () => {
 
   const filtrosEntregador = [
     { value: 'todos', label: '👥 Todos os Entregadores' },
-    { value: 'carlos', label: '👨‍💼 Carlos Silva' },
-    { value: 'antonio', label: '👨‍💼 Antônio Costa' },
-    { value: 'jose', label: '👨‍💼 José Santos' },
-    { value: 'pedro', label: '👨‍💼 Pedro Oliveira' }
+    ...entregadores.map(e => ({ value: e.nome, label: `👨‍💼 ${e.nome}` }))
   ];
 
   const filtrosStatus = [
     { value: 'todos', label: '📋 Todos os Status' },
     { value: 'pendente', label: '⏳ Pendente' },
-    { value: 'em-andamento', label: '🚀 Em Andamento' },
+    { value: 'em_andamento', label: '🚀 Em Andamento' },
     { value: 'finalizada', label: '✅ Finalizada' }
   ];
 
+  // Filtrar entregas
+  const entregasFiltradas = entregas.filter(entrega => {
+    const hoje = new Date();
+    const dataEntrega = new Date(entrega.created_at);
+    
+    // Filtro por data
+    let passaFiltroData = true;
+    if (filtroData === 'hoje') {
+      passaFiltroData = dataEntrega.toDateString() === hoje.toDateString();
+    } else if (filtroData === 'semana') {
+      const inicioSemana = new Date(hoje);
+      inicioSemana.setDate(hoje.getDate() - hoje.getDay());
+      passaFiltroData = dataEntrega >= inicioSemana;
+    } else if (filtroData === 'mes') {
+      passaFiltroData = dataEntrega.getMonth() === hoje.getMonth() && 
+                      dataEntrega.getFullYear() === hoje.getFullYear();
+    }
+
+    // Filtro por entregador
+    const passaFiltroEntregador = filtroEntregador === 'todos' || 
+                                 entrega.entregador === filtroEntregador;
+
+    // Filtro por status
+    const passaFiltroStatus = filtroStatus === 'todos' || 
+                             entrega.status === filtroStatus;
+
+    return passaFiltroData && passaFiltroEntregador && passaFiltroStatus;
+  });
+
   // Calcular métricas
-  const entregasFinalizadas = entregas.filter(e => e.status === 'finalizada');
-  const tempoMedioGeral = entregasFinalizadas.length > 0 
-    ? Math.round(entregasFinalizadas.reduce((acc, e) => acc + (e.tempoTotal || 0), 0) / entregasFinalizadas.length)
+  const entregasFinalizadas = entregasFiltradas.filter(e => e.status === 'finalizada');
+  const entregasUrgentes = entregasFiltradas.filter(e => e.urgente).length;
+  const faturamentoTotal = entregasFiltradas.reduce((acc, e) => acc + (e.valor || 0), 0);
+
+  // Calcular tempo médio
+  const temposEntrega = entregasFinalizadas
+    .filter(e => e.horario_pedido && e.horario_chegada)
+    .map(e => {
+      const inicio = new Date(e.horario_pedido).getTime();
+      const fim = new Date(e.horario_chegada!).getTime();
+      return Math.round((fim - inicio) / (1000 * 60)); // em minutos
+    });
+
+  const tempoMedioGeral = temposEntrega.length > 0 
+    ? Math.round(temposEntrega.reduce((acc, tempo) => acc + tempo, 0) / temposEntrega.length)
     : 0;
-  
-  const totalEntregas = entregas.length;
-  const entregasUrgentes = entregas.filter(e => e.urgente).length;
-  const faturamentoTotal = entregas.reduce((acc, e) => acc + e.valor, 0);
 
   // Dados para gráficos
-  const dadosTempoEntregador = [
-    { nome: 'Carlos', tempo: 84 },
-    { nome: 'Antônio', tempo: 85 },
-    { nome: 'José', tempo: 90 },
-    { nome: 'Pedro', tempo: 78 }
-  ];
+  const dadosTempoEntregador = entregadores.map(entregador => {
+    const entregasDoEntregador = entregasFinalizadas.filter(e => e.entregador === entregador.nome);
+    const temposDoEntregador = entregasDoEntregador
+      .filter(e => e.horario_pedido && e.horario_chegada)
+      .map(e => {
+        const inicio = new Date(e.horario_pedido).getTime();
+        const fim = new Date(e.horario_chegada!).getTime();
+        return Math.round((fim - inicio) / (1000 * 60));
+      });
+    
+    const tempoMedio = temposDoEntregador.length > 0 
+      ? Math.round(temposDoEntregador.reduce((acc, tempo) => acc + tempo, 0) / temposDoEntregador.length)
+      : 0;
+
+    return {
+      nome: entregador.nome.split(' ')[0], // Apenas primeiro nome
+      tempo: tempoMedio
+    };
+  }).filter(item => item.tempo > 0);
 
   const dadosStatus = [
-    { name: 'Finalizadas', value: entregasFinalizadas.length, color: '#10B981' },
-    { name: 'Em Andamento', value: entregas.filter(e => e.status === 'em-andamento').length, color: '#3B82F6' },
-    { name: 'Pendentes', value: entregas.filter(e => e.status === 'pendente').length, color: '#F59E0B' }
+    { 
+      name: 'Finalizadas', 
+      value: entregasFiltradas.filter(e => e.status === 'finalizada').length, 
+      color: '#10B981' 
+    },
+    { 
+      name: 'Em Andamento', 
+      value: entregasFiltradas.filter(e => e.status === 'em_andamento').length, 
+      color: '#3B82F6' 
+    },
+    { 
+      name: 'Pendentes', 
+      value: entregasFiltradas.filter(e => e.status === 'pendente').length, 
+      color: '#F59E0B' 
+    }
   ];
 
   const getStatusBadge = (status: string, urgente: boolean) => {
@@ -141,7 +148,7 @@ const Admin = () => {
             {urgente ? '🚨 URGENTE' : '⏳ Pendente'}
           </Badge>
         );
-      case 'em-andamento':
+      case 'em_andamento':
         return (
           <Badge className="rounded-2xl bg-blue-500 text-white">
             🚀 Em Andamento
@@ -165,6 +172,11 @@ const Admin = () => {
       return `${horas}h ${mins}min`;
     }
     return `${mins}min`;
+  };
+
+  const formatarHorario = (timestamp: string | null) => {
+    if (!timestamp) return '-';
+    return new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   };
 
   return (
@@ -211,7 +223,7 @@ const Admin = () => {
               </div>
               <div>
                 <p className="text-sm text-slate-600 font-medium">Total de Entregas</p>
-                <p className="text-2xl font-bold text-slate-800">{totalEntregas}</p>
+                <p className="text-2xl font-bold text-slate-800">{entregasFiltradas.length}</p>
               </div>
             </div>
           </Card>
@@ -247,7 +259,7 @@ const Admin = () => {
               </div>
               <div>
                 <p className="text-sm text-slate-600 font-medium">Faturamento</p>
-                <p className="text-2xl font-bold text-slate-800">R$ {faturamentoTotal.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-slate-800">R$ {faturamentoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
               </div>
             </div>
           </Card>
@@ -308,7 +320,7 @@ const Admin = () => {
         <Card className="p-6 rounded-3xl shadow-lg bg-white">
           <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center">
             <CalendarDays className="h-5 w-5 mr-2 text-purple-500" />
-            Todas as Entregas
+            Entregas Filtradas ({entregasFiltradas.length})
           </h3>
           
           <div className="overflow-x-auto">
@@ -325,30 +337,34 @@ const Admin = () => {
                 </tr>
               </thead>
               <tbody>
-                {entregas.map((entrega) => (
-                  <tr key={entrega.id} className="border-b border-slate-100 hover:bg-slate-50">
-                    <td className="py-4 px-4">
-                      <div>
-                        <p className="font-medium text-slate-800">{entrega.cliente}</p>
-                        {entrega.urgente && (
-                          <span className="text-xs text-red-600 font-medium">🚨 URGENTE</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-slate-600">{entrega.endereco}</td>
-                    <td className="py-4 px-4 text-slate-600">{entrega.entregador}</td>
-                    <td className="py-4 px-4 text-slate-600">{entrega.horarioPedido}</td>
-                    <td className="py-4 px-4 text-slate-600">
-                      {entrega.horarioChegada || '-'}
-                    </td>
-                    <td className="py-4 px-4 text-slate-600">
-                      {entrega.tempoTotal ? formatarTempo(entrega.tempoTotal) : '-'}
-                    </td>
-                    <td className="py-4 px-4">
-                      {getStatusBadge(entrega.status, entrega.urgente)}
-                    </td>
-                  </tr>
-                ))}
+                {entregasFiltradas.map((entrega) => {
+                  const tempoTotal = entrega.horario_pedido && entrega.horario_chegada
+                    ? Math.round((new Date(entrega.horario_chegada).getTime() - new Date(entrega.horario_pedido).getTime()) / (1000 * 60))
+                    : null;
+
+                  return (
+                    <tr key={entrega.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="py-4 px-4">
+                        <div>
+                          <p className="font-medium text-slate-800">{entrega.cliente}</p>
+                          {entrega.urgente && (
+                            <span className="text-xs text-red-600 font-medium">🚨 URGENTE</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-slate-600">{entrega.endereco}, {entrega.numero}</td>
+                      <td className="py-4 px-4 text-slate-600">{entrega.entregador || '-'}</td>
+                      <td className="py-4 px-4 text-slate-600">{formatarHorario(entrega.horario_pedido)}</td>
+                      <td className="py-4 px-4 text-slate-600">{formatarHorario(entrega.horario_chegada)}</td>
+                      <td className="py-4 px-4 text-slate-600">
+                        {tempoTotal ? formatarTempo(tempoTotal) : '-'}
+                      </td>
+                      <td className="py-4 px-4">
+                        {getStatusBadge(entrega.status, entrega.urgente)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -360,7 +376,7 @@ const Admin = () => {
             <div className="text-center">
               <Users className="h-12 w-12 text-orange-500 mx-auto mb-3" />
               <h4 className="text-lg font-bold text-slate-800 mb-2">Entregadores Ativos</h4>
-              <p className="text-3xl font-bold text-orange-600">4</p>
+              <p className="text-3xl font-bold text-orange-600">{entregadores.length}</p>
             </div>
           </Card>
 
@@ -369,7 +385,9 @@ const Admin = () => {
               <TrendingUp className="h-12 w-12 text-teal-500 mx-auto mb-3" />
               <h4 className="text-lg font-bold text-slate-800 mb-2">Taxa de Sucesso</h4>
               <p className="text-3xl font-bold text-teal-600">
-                {Math.round((entregasFinalizadas.length / totalEntregas) * 100)}%
+                {entregasFiltradas.length > 0 
+                  ? Math.round((entregasFinalizadas.length / entregasFiltradas.length) * 100)
+                  : 0}%
               </p>
             </div>
           </Card>
@@ -379,8 +397,8 @@ const Admin = () => {
               <Clock className="h-12 w-12 text-indigo-500 mx-auto mb-3" />
               <h4 className="text-lg font-bold text-slate-800 mb-2">Melhor Tempo</h4>
               <p className="text-3xl font-bold text-indigo-600">
-                {entregasFinalizadas.length > 0 
-                  ? formatarTempo(Math.min(...entregasFinalizadas.map(e => e.tempoTotal || 0)))
+                {temposEntrega.length > 0 
+                  ? formatarTempo(Math.min(...temposEntrega))
                   : '-'
                 }
               </p>

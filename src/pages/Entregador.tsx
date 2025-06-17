@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { useEntregas } from '@/hooks/useEntregas';
+import { useUsuarios } from '@/hooks/useUsuarios';
 import { 
   User, 
   MapPin, 
@@ -21,51 +23,16 @@ import {
 
 const Entregador = () => {
   const { toast } = useToast();
+  const { entregas, iniciarEntrega, finalizarEntrega, loading } = useEntregas();
+  const { entregadores } = useUsuarios();
   const [entregadorSelecionado, setEntregadorSelecionado] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Dados mockados das entregas pendentes
-  const [entregas, setEntregas] = useState([
-    {
-      id: 1,
-      cliente: 'João da Silva',
-      endereco: 'Rua das Flores, 123',
-      referencia: 'Ao lado da padaria',
-      telefone: '(43) 99999-9999',
-      bateria: '150ah Única Conv',
-      valor: 'R$ 560,00',
-      pagamento: 'Débito',
-      veiculo: 'Caminhão 1113',
-      dataHorario: '17/06 às 14:30',
-      urgente: true,
-      status: 'pendente',
-      horarioPedido: '13:45'
-    },
-    {
-      id: 2,
-      cliente: 'Maria Santos',
-      endereco: 'Av. Brasil, 456',
-      referencia: 'Próximo ao posto',
-      telefone: '(43) 88888-8888',
-      bateria: '100ah Comum',
-      valor: 'R$ 380,00',
-      pagamento: 'Pix',
-      veiculo: 'Van',
-      dataHorario: '17/06 às 16:00',
-      urgente: false,
-      status: 'pendente',
-      horarioPedido: '14:20'
-    }
-  ]);
+  const entregadoresOptions = entregadores.map(e => ({
+    value: e.nome,
+    label: `👨‍💼 ${e.nome}`
+  }));
 
-  const entregadores = [
-    { value: 'carlos', label: '👨‍💼 Carlos Silva' },
-    { value: 'antonio', label: '👨‍💼 Antônio Costa' },
-    { value: 'jose', label: '👨‍💼 José Santos' },
-    { value: 'pedro', label: '👨‍💼 Pedro Oliveira' }
-  ];
-
-  const iniciarEntrega = async (entregaId: number) => {
+  const handleIniciarEntrega = async (entregaId: string) => {
     if (!entregadorSelecionado) {
       toast({
         title: "⚠️ Selecione o entregador",
@@ -75,68 +42,36 @@ const Entregador = () => {
       return;
     }
 
-    setLoading(true);
+    const { error } = await iniciarEntrega(entregaId, entregadorSelecionado);
     
-    try {
-      // Simular início da entrega
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setEntregas(prev => prev.map(entrega => 
-        entrega.id === entregaId 
-          ? { ...entrega, status: 'em-andamento', horarioInicio: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }
-          : entrega
-      ));
-
+    if (!error) {
       toast({
         title: "🚀 Entrega iniciada!",
         description: "A entrega foi marcada como 'Em Andamento'.",
       });
-
-    } catch (error) {
-      toast({
-        title: "❌ Erro",
-        description: "Houve um problema ao iniciar a entrega.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
-  const finalizarEntrega = async (entregaId: number) => {
-    setLoading(true);
-    
+  const handleFinalizarEntrega = async (entregaId: string) => {
     try {
       // Solicitar geolocalização
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
+            const localizacao = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
             
-            // Simular finalização da entrega
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const { error } = await finalizarEntrega(entregaId, localizacao);
             
-            const horarioEntrega = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            
-            setEntregas(prev => prev.map(entrega => 
-              entrega.id === entregaId 
-                ? { 
-                    ...entrega, 
-                    status: 'finalizada', 
-                    horarioEntrega,
-                    localizacao: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-                  }
-                : entrega
-            ));
-
-            toast({
-              title: "✅ Entrega finalizada!",
-              description: `Entrega finalizada às ${horarioEntrega} com localização registrada.`,
-            });
-            
-            setLoading(false);
+            if (!error) {
+              const horarioEntrega = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+              toast({
+                title: "✅ Entrega finalizada!",
+                description: `Entrega finalizada às ${horarioEntrega} com localização registrada.`,
+              });
+            }
           },
-          (error) => {
+          async (error) => {
             console.error('Erro ao obter localização:', error);
             toast({
               title: "⚠️ Erro de localização",
@@ -145,14 +80,14 @@ const Entregador = () => {
             });
             
             // Finalizar sem localização
-            const horarioEntrega = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            setEntregas(prev => prev.map(entrega => 
-              entrega.id === entregaId 
-                ? { ...entrega, status: 'finalizada', horarioEntrega }
-                : entrega
-            ));
-            
-            setLoading(false);
+            const { error: dbError } = await finalizarEntrega(entregaId);
+            if (!dbError) {
+              const horarioEntrega = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+              toast({
+                title: "✅ Entrega finalizada!",
+                description: `Entrega finalizada às ${horarioEntrega}.`,
+              });
+            }
           }
         );
       } else {
@@ -161,16 +96,23 @@ const Entregador = () => {
           description: "Seu navegador não suporta geolocalização.",
           variant: "destructive"
         });
-        setLoading(false);
+        
+        // Finalizar sem localização
+        const { error } = await finalizarEntrega(entregaId);
+        if (!error) {
+          const horarioEntrega = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          toast({
+            title: "✅ Entrega finalizada!",
+            description: `Entrega finalizada às ${horarioEntrega}.`,
+          });
+        }
       }
-
     } catch (error) {
       toast({
         title: "❌ Erro",
         description: "Houve um problema ao finalizar a entrega.",
         variant: "destructive"
       });
-      setLoading(false);
     }
   };
 
@@ -182,7 +124,7 @@ const Entregador = () => {
             {urgente ? '🚨 URGENTE' : '⏳ Pendente'}
           </Badge>
         );
-      case 'em-andamento':
+      case 'em_andamento':
         return (
           <Badge className="rounded-2xl bg-blue-500 hover:bg-blue-600 text-white">
             🚀 Em Andamento
@@ -199,8 +141,13 @@ const Entregador = () => {
     }
   };
 
+  const formatarHorario = (timestamp: string | null) => {
+    if (!timestamp) return '-';
+    return new Date(timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  };
+
   const entregasPendentes = entregas.filter(e => e.status === 'pendente');
-  const entregasAndamento = entregas.filter(e => e.status === 'em-andamento');
+  const entregasAndamento = entregas.filter(e => e.status === 'em_andamento');
   const entregasFinalizadas = entregas.filter(e => e.status === 'finalizada');
 
   return (
@@ -213,7 +160,7 @@ const Entregador = () => {
               value={entregadorSelecionado}
               onChange={setEntregadorSelecionado}
               placeholder="Escolha seu nome"
-              options={entregadores}
+              options={entregadoresOptions}
             />
           </FormField>
         </Card>
@@ -232,7 +179,7 @@ const Entregador = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="text-lg font-bold text-slate-800">{entrega.cliente}</h4>
-                        <p className="text-slate-600">Pedido às {entrega.horarioPedido}</p>
+                        <p className="text-slate-600">Pedido às {formatarHorario(entrega.horario_pedido)}</p>
                       </div>
                       {getStatusBadge(entrega.status, entrega.urgente)}
                     </div>
@@ -240,7 +187,7 @@ const Entregador = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.endereco}</span>
+                        <span>{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Phone className="h-4 w-4 text-slate-500" />
@@ -252,16 +199,20 @@ const Entregador = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <DollarSign className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.valor} ({entrega.pagamento})</span>
+                        <span>R$ {entrega.valor?.toFixed(2) || '0,00'} ({entrega.forma_pagamento})</span>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <Truck className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.veiculo}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Clock className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.dataHorario}</span>
-                      </div>
+                      {entrega.veiculo && (
+                        <div className="flex items-center space-x-2">
+                          <Truck className="h-4 w-4 text-slate-500" />
+                          <span>{entrega.veiculo}</span>
+                        </div>
+                      )}
+                      {entrega.data_entrega && (
+                        <div className="flex items-center space-x-2">
+                          <Clock className="h-4 w-4 text-slate-500" />
+                          <span>{new Date(entrega.data_entrega).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                      )}
                     </div>
 
                     {entrega.referencia && (
@@ -273,7 +224,7 @@ const Entregador = () => {
                     )}
 
                     <Button
-                      onClick={() => iniciarEntrega(entrega.id)}
+                      onClick={() => handleIniciarEntrega(entrega.id)}
                       disabled={loading || !entregadorSelecionado}
                       className="w-full h-12 text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 text-white"
                     >
@@ -301,7 +252,7 @@ const Entregador = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="text-lg font-bold text-slate-800">{entrega.cliente}</h4>
-                        <p className="text-slate-600">Iniciado às {entrega.horarioInicio}</p>
+                        <p className="text-slate-600">Iniciado às {formatarHorario(entrega.horario_inicio)}</p>
                       </div>
                       {getStatusBadge(entrega.status, entrega.urgente)}
                     </div>
@@ -309,7 +260,7 @@ const Entregador = () => {
                     <div className="bg-white p-4 rounded-2xl">
                       <div className="flex items-center space-x-2 mb-2">
                         <MapPin className="h-4 w-4 text-slate-500" />
-                        <span className="font-medium">{entrega.endereco}</span>
+                        <span className="font-medium">{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Phone className="h-4 w-4 text-slate-500" />
@@ -318,7 +269,7 @@ const Entregador = () => {
                     </div>
 
                     <Button
-                      onClick={() => finalizarEntrega(entrega.id)}
+                      onClick={() => handleFinalizarEntrega(entrega.id)}
                       disabled={loading}
                       className="w-full h-12 text-lg font-semibold rounded-2xl bg-green-500 hover:bg-green-600 text-white"
                     >
@@ -340,13 +291,13 @@ const Entregador = () => {
               Finalizadas Hoje ({entregasFinalizadas.length})
             </h3>
             <div className="space-y-4">
-              {entregasFinalizadas.map((entrega) => (
+              {entregasFinalizadas.slice(0, 5).map((entrega) => (
                 <Card key={entrega.id} className="p-6 rounded-3xl shadow-lg bg-green-50 border-2 border-green-200">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
                         <h4 className="text-lg font-bold text-slate-800">{entrega.cliente}</h4>
-                        <p className="text-slate-600">Finalizado às {entrega.horarioEntrega}</p>
+                        <p className="text-slate-600">Finalizado às {formatarHorario(entrega.horario_chegada)}</p>
                       </div>
                       {getStatusBadge(entrega.status, entrega.urgente)}
                     </div>
@@ -354,18 +305,18 @@ const Entregador = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div className="flex items-center space-x-2">
                         <MapPin className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.endereco}</span>
+                        <span>{entrega.endereco}, {entrega.numero}</span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <DollarSign className="h-4 w-4 text-slate-500" />
-                        <span>{entrega.valor}</span>
+                        <span>R$ {entrega.valor?.toFixed(2) || '0,00'}</span>
                       </div>
                     </div>
 
-                    {entrega.localizacao && (
+                    {entrega.localizacao_entrega && (
                       <div className="bg-white p-3 rounded-2xl">
                         <p className="text-sm text-slate-600">
-                          📍 <strong>Localização registrada:</strong> {entrega.localizacao}
+                          📍 <strong>Localização registrada:</strong> {entrega.localizacao_entrega}
                         </p>
                       </div>
                     )}

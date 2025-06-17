@@ -9,7 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      entregas: {
+        Row: {
+          bateria: string
+          cliente: string
+          created_at: string
+          data_entrega: string | null
+          endereco: string
+          entregador: string | null
+          forma_pagamento: string
+          horario_chegada: string | null
+          horario_entrega: string | null
+          horario_inicio: string | null
+          horario_pedido: string
+          id: string
+          localizacao_entrega: string | null
+          numero: string
+          referencia: string | null
+          status: Database["public"]["Enums"]["delivery_status"]
+          telefone: string
+          updated_at: string
+          urgente: boolean
+          valor: number | null
+          veiculo: string | null
+          vendedor: string | null
+        }
+        Insert: {
+          bateria: string
+          cliente: string
+          created_at?: string
+          data_entrega?: string | null
+          endereco: string
+          entregador?: string | null
+          forma_pagamento: string
+          horario_chegada?: string | null
+          horario_entrega?: string | null
+          horario_inicio?: string | null
+          horario_pedido?: string
+          id?: string
+          localizacao_entrega?: string | null
+          numero: string
+          referencia?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          telefone: string
+          updated_at?: string
+          urgente?: boolean
+          valor?: number | null
+          veiculo?: string | null
+          vendedor?: string | null
+        }
+        Update: {
+          bateria?: string
+          cliente?: string
+          created_at?: string
+          data_entrega?: string | null
+          endereco?: string
+          entregador?: string | null
+          forma_pagamento?: string
+          horario_chegada?: string | null
+          horario_entrega?: string | null
+          horario_inicio?: string | null
+          horario_pedido?: string
+          id?: string
+          localizacao_entrega?: string | null
+          numero?: string
+          referencia?: string | null
+          status?: Database["public"]["Enums"]["delivery_status"]
+          telefone?: string
+          updated_at?: string
+          urgente?: boolean
+          valor?: number | null
+          veiculo?: string | null
+          vendedor?: string | null
+        }
+        Relationships: []
+      }
+      usuarios: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          tipo: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          tipo: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +113,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      delivery_status: "pendente" | "em_andamento" | "finalizada"
+      user_type: "vendedora" | "entregador" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +229,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      delivery_status: ["pendente", "em_andamento", "finalizada"],
+      user_type: ["vendedora", "entregador", "admin"],
+    },
   },
 } as const
