@@ -1,3 +1,4 @@
+
 // Arquivo: src/pages/AdminCanais.tsx
 
 import React, { useState } from 'react';
@@ -24,16 +25,16 @@ const AdminCanais = () => {
   const { toast } = useToast();
   const { canais, criarCanal, atualizarCanal, inativarCanal, ativarCanal, deletarCanal, loading } = useCanais();
   const [showForm, setShowForm] = useState(false);
-  const [editingCanal, setEditingCanal] = useState<string | null>(null);
+  const [editingCanal, setEditingCanal] = useState<number | null>(null);
   const [formData, setFormData] = useState({
-    nome_canal: '',
-    canal_ativo: true
+    nomeCanal: '',
+    canalAtivo: true
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.nome_canal.trim()) {
+    if (!formData.nomeCanal.trim()) {
       toast({
         title: "⚠️ Campo obrigatório",
         description: "Por favor, informe o nome do canal.",
@@ -44,33 +45,41 @@ const AdminCanais = () => {
 
     if (editingCanal) {
       // Editando canal existente
-      const { error } = await atualizarCanal(editingCanal, formData);
-      if (!error) {
+      const result = await atualizarCanal(editingCanal, formData);
+      if (result) {
         setEditingCanal(null);
         setShowForm(false);
         resetForm();
+        toast({
+          title: "✅ Canal atualizado",
+          description: "Canal atualizado com sucesso!",
+        });
       }
     } else {
       // Criando novo canal
-      const { error } = await criarCanal(formData);
-      if (!error) {
+      const result = await criarCanal(formData.nomeCanal, formData.canalAtivo);
+      if (result) {
         setShowForm(false);
         resetForm();
+        toast({
+          title: "✅ Canal criado",
+          description: "Novo canal criado com sucesso!",
+        });
       }
     }
   };
 
   const resetForm = () => {
     setFormData({
-      nome_canal: '',
-      canal_ativo: true
+      nomeCanal: '',
+      canalAtivo: true
     });
   };
 
   const handleEdit = (canal: any) => {
     setFormData({
-      nome_canal: canal.nome_canal,
-      canal_ativo: canal.canal_ativo
+      nomeCanal: canal.nomeCanal,
+      canalAtivo: canal.canalAtivo
     });
     setEditingCanal(canal.id);
     setShowForm(true);
@@ -82,7 +91,7 @@ const AdminCanais = () => {
     resetForm();
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+  const handleToggleStatus = async (id: number, currentStatus: boolean) => {
     if (currentStatus) {
       await inativarCanal(id);
     } else {
@@ -90,7 +99,7 @@ const AdminCanais = () => {
     }
   };
 
-  const handleDelete = async (id: string, nomeCanal: string) => {
+  const handleDelete = async (id: number, nomeCanal: string) => {
     if (window.confirm(`Tem certeza que deseja deletar permanentemente o canal "${nomeCanal}"?\n\nEsta ação não pode ser desfeita!`)) {
       await deletarCanal(id);
     }
@@ -147,16 +156,16 @@ const AdminCanais = () => {
 
               <FormField label="Nome do Canal" icon={<Zap className="h-5 w-5" />} required>
                 <TextInput
-                  value={formData.nome_canal}
-                  onChange={(value) => setFormData(prev => ({ ...prev, nome_canal: value }))}
+                  value={formData.nomeCanal}
+                  onChange={(value) => setFormData(prev => ({ ...prev, nomeCanal: value }))}
                   placeholder="Ex: Instagram, Facebook, WhatsApp..."
                 />
               </FormField>
 
               <FormField label="Status" icon={<Eye className="h-5 w-5" />}>
                 <CheckboxInput
-                  checked={formData.canal_ativo}
-                  onChange={(checked) => setFormData(prev => ({ ...prev, canal_ativo: checked }))}
+                  checked={formData.canalAtivo}
+                  onChange={(checked) => setFormData(prev => ({ ...prev, canalAtivo: checked }))}
                   label="Canal ativo (disponível para seleção)"
                 />
               </FormField>
@@ -219,7 +228,7 @@ const AdminCanais = () => {
                       <Zap className="h-5 w-5 text-yellow-400" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-white">{canal.nome_canal}</h4>
+                      <h4 className="font-semibold text-white">{canal.nomeCanal}</h4>
                       <p className="text-sm text-gray-400">
                         Criado em {new Date(canal.created_at).toLocaleDateString('pt-BR')}
                       </p>
@@ -227,7 +236,7 @@ const AdminCanais = () => {
                   </div>
 
                   <div className="flex items-center space-x-4">
-                    {getStatusBadge(canal.canal_ativo)}
+                    {getStatusBadge(canal.canalAtivo)}
                     
                     <div className="flex space-x-2">
                       <Button
@@ -241,21 +250,21 @@ const AdminCanais = () => {
                       </Button>
                       
                       <Button
-                        onClick={() => handleToggleStatus(canal.id, canal.canal_ativo)}
+                        onClick={() => handleToggleStatus(canal.id, canal.canalAtivo)}
                         variant="ghost"
                         size="sm"
                         className={`${
-                          canal.canal_ativo 
+                          canal.canalAtivo 
                             ? 'text-red-400 hover:text-red-300 hover:bg-red-400/10' 
                             : 'text-green-400 hover:text-green-300 hover:bg-green-400/10'
                         }`}
                         disabled={loading}
                       >
-                        {canal.canal_ativo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {canal.canalAtivo ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                       
                       <Button
-                        onClick={() => handleDelete(canal.id, canal.nome_canal)}
+                        onClick={() => handleDelete(canal.id, canal.nomeCanal)}
                         variant="ghost"
                         size="sm"
                         className="text-red-400 hover:text-red-300 hover:bg-red-400/10"
@@ -278,7 +287,7 @@ const AdminCanais = () => {
               <Eye className="h-12 w-12 text-green-400 mx-auto mb-3" />
               <h4 className="text-lg font-bold text-white mb-2">Canais Ativos</h4>
               <p className="text-3xl font-bold text-green-400">
-                {canais.filter(c => c.canal_ativo).length}
+                {canais.filter(c => c.canalAtivo).length}
               </p>
             </div>
           </Card>
@@ -288,7 +297,7 @@ const AdminCanais = () => {
               <EyeOff className="h-12 w-12 text-red-400 mx-auto mb-3" />
               <h4 className="text-lg font-bold text-white mb-2">Canais Inativos</h4>
               <p className="text-3xl font-bold text-red-400">
-                {canais.filter(c => !c.canal_ativo).length}
+                {canais.filter(c => !c.canalAtivo).length}
               </p>
             </div>
           </Card>
