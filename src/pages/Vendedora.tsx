@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useEntregas } from '@/hooks/useEntregas';
 import { useUsuarios } from '@/hooks/useUsuarios';
-import { useCanais } from '@/hooks/useCanais'; // Novo hook
+import { useCanais } from '@/hooks/useCanais'; // Hook dos canais
 import { 
   MapPin, 
   User, 
@@ -20,14 +20,14 @@ import {
   Copy,
   CheckCircle,
   Sparkles,
-  Zap // Novo ícone para canal
+  Zap // Ícone para canal
 } from 'lucide-react';
 
 const Vendedora = () => {
   const { toast } = useToast();
   const { criarEntrega, loading } = useEntregas();
   const { vendedoras } = useUsuarios();
-  const { canaisAtivos } = useCanais(); // Hook dos canais
+  const { canaisAtivos } = useCanais(); // Hook dos canais com canaisAtivos disponível
   const [showComanda, setShowComanda] = useState(false);
   const [comandaData, setComandaData] = useState<any>(null);
   
@@ -45,7 +45,7 @@ const Vendedora = () => {
     horario_entrega: '',
     urgente: false,
     vendedor: '',
-    canal: '' // Novo campo
+    canal: '' // Campo para canal
   });
 
   const formasPagamento = [
@@ -67,10 +67,10 @@ const Vendedora = () => {
     label: `👩‍💼 ${v.nome}`
   }));
 
-  // Opções de canais dinâmicas
+  // Opções de canais dinâmicas - usando a propriedade correta
   const canaisOptions = canaisAtivos.map(canal => ({
-    value: canal.nome_canal,
-    label: `📢 ${canal.nome_canal}`
+    value: canal.nomeCanal,
+    label: `📢 ${canal.nomeCanal}`
   }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -101,7 +101,7 @@ const Vendedora = () => {
       horario_entrega: formData.horario_entrega || null,
       urgente: formData.urgente,
       vendedor: formData.vendedor || null,
-      canal: formData.canal || null, // Novo campo
+      canal: formData.canal || null,
       status: 'pendente' as const
     };
 
@@ -187,7 +187,7 @@ ${comandaData.urgente ? '🚨 URGENTE: SIM' : '⏰ Prioridade: Normal'}
       horario_entrega: '',
       urgente: false,
       vendedor: '',
-      canal: '' // Reset do canal
+      canal: ''
     });
     setShowComanda(false);
     setComandaData(null);

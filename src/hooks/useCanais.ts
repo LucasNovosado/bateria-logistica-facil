@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
@@ -10,6 +11,7 @@ export interface Canal {
 
 export function useCanais() {
   const [canais, setCanais] = useState<Canal[]>([])
+  const [canaisAtivos, setCanaisAtivos] = useState<Canal[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,11 +43,18 @@ export function useCanais() {
         .order('nomeCanal', { ascending: true })
 
       if (error) throw error
-      return data || []
+      const canaisAtivosData = data || []
+      setCanaisAtivos(canaisAtivosData)
+      return canaisAtivosData
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao buscar canais ativos')
       return []
     }
+  }
+
+  // Criar novo canal (alias para createCanal)
+  const criarCanal = async (nomeCanal: string, canalAtivo: boolean = true) => {
+    return await createCanal(nomeCanal, canalAtivo)
   }
 
   // Criar novo canal
@@ -60,6 +69,9 @@ export function useCanais() {
       
       if (data && data.length > 0) {
         setCanais(prev => [data[0], ...prev])
+        if (data[0].canalAtivo) {
+          setCanaisAtivos(prev => [...prev, data[0]])
+        }
       }
       
       return data?.[0] || null
@@ -67,6 +79,11 @@ export function useCanais() {
       setError(err instanceof Error ? err.message : 'Erro ao criar canal')
       return null
     }
+  }
+
+  // Atualizar canal (alias para updateCanal)
+  const atualizarCanal = async (id: number, updates: Partial<Omit<Canal, 'id' | 'created_at'>>) => {
+    return await updateCanal(id, updates)
   }
 
   // Atualizar canal
@@ -84,6 +101,19 @@ export function useCanais() {
         setCanais(prev => prev.map(canal => 
           canal.id === id ? { ...canal, ...data[0] } : canal
         ))
+        
+        // Update canaisAtivos if needed
+        if (data[0].canalAtivo) {
+          setCanaisAtivos(prev => {
+            const exists = prev.some(c => c.id === id)
+            if (!exists) {
+              return [...prev, data[0]]
+            }
+            return prev.map(c => c.id === id ? data[0] : c)
+          })
+        } else {
+          setCanaisAtivos(prev => prev.filter(c => c.id !== id))
+        }
       }
 
       return data?.[0] || null
@@ -91,6 +121,11 @@ export function useCanais() {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar canal')
       return null
     }
+  }
+
+  // Deletar canal (alias para deleteCanal)
+  const deletarCanal = async (id: number) => {
+    return await deleteCanal(id)
   }
 
   // Deletar canal
@@ -104,11 +139,22 @@ export function useCanais() {
       if (error) throw error
 
       setCanais(prev => prev.filter(canal => canal.id !== id))
+      setCanaisAtivos(prev => prev.filter(canal => canal.id !== id))
       return true
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao deletar canal')
       return false
     }
+  }
+
+  // Ativar canal
+  const ativarCanal = async (id: number) => {
+    return await updateCanal(id, { canalAtivo: true })
+  }
+
+  // Inativar canal
+  const inativarCanal = async (id: number) => {
+    return await updateCanal(id, { canalAtivo: false })
   }
 
   // Alternar status ativo/inativo do canal
@@ -129,6 +175,12 @@ export function useCanais() {
         setCanais(prev => prev.map(c => 
           c.id === id ? { ...c, canalAtivo: !c.canalAtivo } : c
         ))
+        
+        if (!canal.canalAtivo) {
+          setCanaisAtivos(prev => [...prev, data[0]])
+        } else {
+          setCanaisAtivos(prev => prev.filter(c => c.id !== id))
+        }
       }
 
       return data?.[0] || null
@@ -174,17 +226,24 @@ export function useCanais() {
 
   useEffect(() => {
     fetchCanais()
+    fetchCanaisAtivos()
   }, [])
 
   return {
     canais,
+    canaisAtivos, // Now available!
     loading,
     error,
     fetchCanais,
     fetchCanaisAtivos,
     createCanal,
+    criarCanal, // Alias
     updateCanal,
+    atualizarCanal, // Alias
     deleteCanal,
+    deletarCanal, // Alias
+    ativarCanal,
+    inativarCanal,
     toggleCanalAtivo,
     getCanalById,
     getCanalByNome,
