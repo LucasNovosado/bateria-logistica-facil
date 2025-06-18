@@ -19,23 +19,30 @@ export function useCanais() {
   const fetchCanais = async () => {
     try {
       setLoading(true)
+      console.log('Buscando canais...')
+      
       const { data, error } = await supabase
         .from('canais')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        console.error('Erro na query canais:', error)
+        throw error
+      }
+      
+      console.log('Dados brutos da query:', data)
       
       // Mapear os dados do banco para a interface
       const canaisData = (data || []).map(canal => ({
         id: canal.id,
         created_at: canal.created_at,
-        nomeCanal: canal.nomeCanal || canal.nome_canal || '',
+        nomeCanal: canal.nomeCanal || canal.nome_canal || `Canal ${canal.id}`,
         canalAtivo: canal.canalAtivo ?? canal.canal_ativo ?? true
       }))
       
       setCanais(canaisData)
-      console.log('Canais carregados:', canaisData)
+      console.log('Canais processados:', canaisData)
     } catch (err) {
       console.error('Erro ao buscar canais:', err)
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
@@ -47,43 +54,57 @@ export function useCanais() {
   // Buscar canais ativos
   const fetchCanaisAtivos = async () => {
     try {
-      const { data, error } = await supabase
+      console.log('Buscando canais ativos...')
+      
+      // Primeira tentativa com canalAtivo
+      let { data, error } = await supabase
         .from('canais')
         .select('*')
         .eq('canalAtivo', true)
-        .order('nomeCanal', { ascending: true })
+        .order('id', { ascending: true })
 
+      // Se der erro, tentar com canal_ativo
       if (error) {
-        // Se falhar com canalAtivo, tentar com canal_ativo
-        const { data: dataAlt, error: errorAlt } = await supabase
+        console.log('Tentando com canal_ativo...')
+        const result = await supabase
           .from('canais')
           .select('*')
           .eq('canal_ativo', true)
-          .order('nomeCanal', { ascending: true })
-
-        if (errorAlt) throw errorAlt
+          .order('id', { ascending: true })
         
-        const canaisAtivosData = (dataAlt || []).map(canal => ({
-          id: canal.id,
-          created_at: canal.created_at,
-          nomeCanal: canal.nomeCanal || canal.nome_canal || '',
-          canalAtivo: canal.canalAtivo ?? canal.canal_ativo ?? true
-        }))
-        
-        setCanaisAtivos(canaisAtivosData)
-        console.log('Canais ativos carregados (alternativo):', canaisAtivosData)
-        return canaisAtivosData
+        data = result.data
+        error = result.error
       }
 
+      // Se ainda der erro, buscar todos e filtrar
+      if (error || !data) {
+        console.log('Buscando todos os canais e filtrando...')
+        const result = await supabase
+          .from('canais')
+          .select('*')
+          .order('id', { ascending: true })
+        
+        if (result.error) throw result.error
+        
+        // Filtrar apenas os ativos
+        data = (result.data || []).filter(canal => 
+          canal.canalAtivo === true || 
+          canal.canal_ativo === true || 
+          canal.canalAtivo !== false
+        )
+      }
+
+      console.log('Dados brutos canais ativos:', data)
+      
       const canaisAtivosData = (data || []).map(canal => ({
         id: canal.id,
         created_at: canal.created_at,
-        nomeCanal: canal.nomeCanal || canal.nome_canal || '',
+        nomeCanal: canal.nomeCanal || canal.nome_canal || `Canal ${canal.id}`,
         canalAtivo: canal.canalAtivo ?? canal.canal_ativo ?? true
       }))
       
       setCanaisAtivos(canaisAtivosData)
-      console.log('Canais ativos carregados:', canaisAtivosData)
+      console.log('Canais ativos processados:', canaisAtivosData)
       return canaisAtivosData
     } catch (err) {
       console.error('Erro ao buscar canais ativos:', err)
@@ -108,9 +129,16 @@ export function useCanais() {
       if (error) throw error
       
       if (data && data.length > 0) {
-        setCanais(prev => [data[0], ...prev])
-        if (data[0].canalAtivo) {
-          setCanaisAtivos(prev => [...prev, data[0]])
+        const novoCanal = {
+          id: data[0].id,
+          created_at: data[0].created_at,
+          nomeCanal: data[0].nomeCanal || data[0].nome_canal || '',
+          canalAtivo: data[0].canalAtivo ?? data[0].canal_ativo ?? true
+        }
+        
+        setCanais(prev => [novoCanal, ...prev])
+        if (novoCanal.canalAtivo) {
+          setCanaisAtivos(prev => [...prev, novoCanal])
         }
       }
       
