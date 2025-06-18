@@ -9,9 +9,31 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      canais: {
+        Row: {
+          canalAtivo: boolean | null
+          created_at: string
+          id: number
+          nomeCanal: string | null
+        }
+        Insert: {
+          canalAtivo?: boolean | null
+          created_at?: string
+          id?: number
+          nomeCanal?: string | null
+        }
+        Update: {
+          canalAtivo?: boolean | null
+          created_at?: string
+          id?: number
+          nomeCanal?: string | null
+        }
+        Relationships: []
+      }
       entregas: {
         Row: {
           bateria: string
+          canais: string | null
           cliente: string
           created_at: string
           data_entrega: string | null
@@ -36,6 +58,7 @@ export type Database = {
         }
         Insert: {
           bateria: string
+          canais?: string | null
           cliente: string
           created_at?: string
           data_entrega?: string | null
@@ -60,6 +83,7 @@ export type Database = {
         }
         Update: {
           bateria?: string
+          canais?: string | null
           cliente?: string
           created_at?: string
           data_entrega?: string | null
