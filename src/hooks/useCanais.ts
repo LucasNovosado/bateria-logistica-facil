@@ -25,8 +25,19 @@ export function useCanais() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setCanais(data || [])
+      
+      // Mapear os dados do banco para a interface
+      const canaisData = (data || []).map(canal => ({
+        id: canal.id,
+        created_at: canal.created_at,
+        nomeCanal: canal.nomeCanal || canal.nome_canal || '',
+        canalAtivo: canal.canalAtivo ?? canal.canal_ativo ?? true
+      }))
+      
+      setCanais(canaisData)
+      console.log('Canais carregados:', canaisData)
     } catch (err) {
+      console.error('Erro ao buscar canais:', err)
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
     } finally {
       setLoading(false)
@@ -42,11 +53,40 @@ export function useCanais() {
         .eq('canalAtivo', true)
         .order('nomeCanal', { ascending: true })
 
-      if (error) throw error
-      const canaisAtivosData = data || []
+      if (error) {
+        // Se falhar com canalAtivo, tentar com canal_ativo
+        const { data: dataAlt, error: errorAlt } = await supabase
+          .from('canais')
+          .select('*')
+          .eq('canal_ativo', true)
+          .order('nomeCanal', { ascending: true })
+
+        if (errorAlt) throw errorAlt
+        
+        const canaisAtivosData = (dataAlt || []).map(canal => ({
+          id: canal.id,
+          created_at: canal.created_at,
+          nomeCanal: canal.nomeCanal || canal.nome_canal || '',
+          canalAtivo: canal.canalAtivo ?? canal.canal_ativo ?? true
+        }))
+        
+        setCanaisAtivos(canaisAtivosData)
+        console.log('Canais ativos carregados (alternativo):', canaisAtivosData)
+        return canaisAtivosData
+      }
+
+      const canaisAtivosData = (data || []).map(canal => ({
+        id: canal.id,
+        created_at: canal.created_at,
+        nomeCanal: canal.nomeCanal || canal.nome_canal || '',
+        canalAtivo: canal.canalAtivo ?? canal.canal_ativo ?? true
+      }))
+      
       setCanaisAtivos(canaisAtivosData)
+      console.log('Canais ativos carregados:', canaisAtivosData)
       return canaisAtivosData
     } catch (err) {
+      console.error('Erro ao buscar canais ativos:', err)
       setError(err instanceof Error ? err.message : 'Erro ao buscar canais ativos')
       return []
     }
