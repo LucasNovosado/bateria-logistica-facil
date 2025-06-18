@@ -231,22 +231,22 @@ export function useCanais() {
 
   return {
     canais,
-    canaisAtivos, // Now available!
+    canaisAtivos,
     loading,
     error,
     fetchCanais,
     fetchCanaisAtivos,
     createCanal,
-    criarCanal, // Alias
+    criarCanal,
     updateCanal,
-    atualizarCanal, // Alias
+    atualizarCanal,
     deleteCanal,
-    deletarCanal, // Alias
+    deletarCanal,
     ativarCanal,
     inativarCanal,
     toggleCanalAtivo,
     getCanalById,
     getCanalByNome,
-    setError // Para limpar erros manualmente
+    setError
   }
 }

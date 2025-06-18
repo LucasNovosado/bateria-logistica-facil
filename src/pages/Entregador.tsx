@@ -62,7 +62,7 @@ const Entregador = () => {
     if (!entregaAtual) return;
 
     const { error } = await atualizarEntrega(entregaAtual.id, {
-      status: 'entregue',
+      status: 'finalizada',
       horario_chegada: new Date().toISOString()
     });
 
